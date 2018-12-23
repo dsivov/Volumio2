@@ -1549,7 +1549,6 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 
 				var audiolist = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAudioDevices', '');
-
 				if (audiolist != undefined) {
 					audiolist.then(function (data) {
 						selfConnWebSocket.emit('pushOutputDevices', data);
