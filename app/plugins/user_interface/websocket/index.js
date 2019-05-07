@@ -348,7 +348,7 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 				var response;
 
-				response = self.commandRouter.volumioGetBrowseSources();
+				response = self.commandRouter.volumioGetVisibleBrowseSources();
 
 				selfConnWebSocket.emit('pushBrowseSources', response);
 			});
@@ -595,8 +595,12 @@ function InterfaceWebUI(context) {
 
 				var returnedData = self.commandRouter.playListManager.addToFavourites(data.service, data.uri, data.title);
 				returnedData.then(function (data) {
-					selfConnWebSocket.emit('urifavourites', data);
-				});
+					if (data !== undefined) {
+                        selfConnWebSocket.emit('urifavourites', data);
+					}
+				}).fail(function () {
+                        self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('PLAYLIST.ADDED_TO_FAVOURITES'));
+                    });
 
 			});
 
@@ -618,7 +622,7 @@ function InterfaceWebUI(context) {
 					} else if (data.service === 'streaming_services') {
 						setTimeout(()=> {
                             var uri = data.uri.substring(0, data.uri.lastIndexOf("/") );
-                        	response = response=self.musicLibrary.executeBrowseSource(uri);
+                        	response = self.musicLibrary.executeBrowseSource(uri);
                         if (response != undefined) {
                             response.then(function (result) {
                                 selfConnWebSocket.emit('pushBrowseLibrary', result);
@@ -935,9 +939,6 @@ function InterfaceWebUI(context) {
 						}
 					});
 				}
-				else console.log("Plugin multiroom or method getMultiroom not found");
-
-
 			});
 
 			/**
@@ -1317,6 +1318,36 @@ function InterfaceWebUI(context) {
 
             });
 
+            // ======================== AUDIO OUTPUTS ==========================
+
+            connWebSocket.on('getAudioOutputs', function (data) {
+				var selfConnWebSocket = this;
+
+				var outputs = self.commandRouter.getAudioOutputs();
+				if (outputs != undefined) {
+					selfConnWebSocket.emit('pushAudioOutputs', outputs);
+					};
+				}
+			);
+
+			connWebSocket.on('enableAudioOutput', function (data) {
+				let selfConnWebSocket = this;
+
+				self.commandRouter.enableAudioOutput(data);
+			});
+
+		connWebSocket.on('disableAudioOutput', function (data) {
+			let selfConnWebSocket = this;
+
+			self.commandRouter.disableAudioOutput(data);
+		});
+
+		connWebSocket.on('setAudioOutputVolume', function (data) {
+			let selfConnWebSocket = this;
+
+			self.commandRouter.setAudioOutputVolume(data);
+		});
+
 
 
 	connWebSocket.on('saveQueueToPlaylist', function (data) {
@@ -1575,6 +1606,18 @@ function InterfaceWebUI(context) {
 
 				selfConnWebSocket.emit('pushDonePage', laststep);
 			});
+
+        	connWebSocket.on('setDeviceActivationCode', function (data) {
+            	var selfConnWebSocket = this;
+
+                var codeCheck = self.commandRouter.executeOnPlugin('system_controller', 'my_volumio', 'checkDeviceCode', data);
+
+                if (codeCheck != undefined) {
+                    codeCheck.then(function (data) {
+                        selfConnWebSocket.emit('pushDeviceActivationCodeResult', data);
+                    });
+                }
+        	});
 
 			connWebSocket.on('checkPassword', function (data) {
 				var selfConnWebSocket = this;

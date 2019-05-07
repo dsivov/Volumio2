@@ -114,8 +114,7 @@ CoreStateMachine.prototype.getState = function () {
             this.consumeState.samplerate = '';
             this.consumeState.bitdepth =  '';
         }
-
-
+			
             return {
                 status: this.consumeState.status,
                 position: this.currentPosition,
@@ -125,7 +124,7 @@ CoreStateMachine.prototype.getState = function () {
                 albumart: this.consumeState.albumart,
                 uri: this.consumeState.uri,
                 trackType: this.consumeState.trackType,
-                seek: this.consumeState.seek,
+                seek: this.currentSeek,
                 duration: this.consumeState.duration,
                 samplerate: this.consumeState.samplerate,
                 bitdepth: this.consumeState.bitdepth,
@@ -443,6 +442,12 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 
 		var remainingTime=this.currentSongDuration-this.currentSeek;
+		if (remainingTime < 0)
+		{
+			this.commandRouter.pushConsoleMessage("ERROR increasePlaybackTimer remainingTime:" + remainingTime + " negative - askedForPrefetch:" + this.askedForPrefetch + " - simulateStopStartDone:" + this.simulateStopStartDone);
+			remainingTime = 0;
+		}
+
 		if(remainingTime>=0 && remainingTime<5000 && this.askedForPrefetch==false)
 		{
 			this.askedForPrefetch=true;
@@ -457,7 +462,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
                 this.commandRouter.pushConsoleMessage("Prefetching next song");
 
 				var plugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
-				if(typeof(plugin.prefetch) === typeof(Function))
+				if(plugin && typeof(plugin.prefetch) === typeof(Function))
 				{
 					this.prefetchDone=true;
 					plugin.prefetch(nextTrackBlock);
@@ -511,9 +516,10 @@ CoreStateMachine.prototype.getcurrentVolume = function () {
     	self.currentVolume = volumeData.vol;
     	self.currentMute = volumeData.mute;
     	self.currentDisableVolumeControl = volumeData.disableVolumeControl;
+    	this.updateTrackBlock();
+    	self.commandRouter.volumioretrievevolume();
 	})
 
-	this.updateTrackBlock();
 	return libQ.resolve();
 };
 
@@ -594,6 +600,20 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
   } else {
     this.volatileService = undefined;
 
+    // On slow devices, nodejs might update mpd before the scheduled setTimeout ends.
+    // To handle this, make a direct call to increasePlaybackTimer to force another mpd update.
+    // Sometimes the mpd update occurs more than 500ms before the end of the scheduled setTimeout.              
+    // Setting currentSeek = currentSongDuration ensures a setTimeout increase of no more than 500ms.
+	if (this.askedForPrefetch)
+	{
+		// Debug if the workaround is applicable
+		this.commandRouter.pushDebugConsoleMessage('ERROR Prefetch 500ms setTimeout missed >> directly calling increasePlaybackTimer');
+		this.commandRouter.pushDebugConsoleMessage("ERROR this.runPlaybackTimer:" + this.runPlaybackTimer + " this.currentSongDuration:" + this.currentSongDuration + " - this.currentSeek:" + this.currentSeek + " - this.prefetchDone:"+this.prefetchDone+ " - this.simulateStopStartDone:"+this.simulateStopStartDone);
+
+		this.currentSeek = this.currentSongDuration;
+		this.increasePlaybackTimer();
+	}
+  
     var trackBlock = this.getTrack(this.currentPosition);
 	}
 
@@ -1117,7 +1137,7 @@ CoreStateMachine.prototype.volatilePlay = function () {
 
     if(this.isVolatile){
         var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
-        if (typeof thisPlugin.play === "function") {
+        if (thisPlugin && typeof thisPlugin.play === "function") {
             thisPlugin.play();
         } else {
             this.commandRouter.pushConsoleMessage('WARNING: No play method for volatile plugin ' + this.volatileService);
@@ -1139,7 +1159,7 @@ CoreStateMachine.prototype.seek = function (position) {
 			var curPos = this.getState().seek;
 			var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
 			this.currentSeek = curPos + 10000;
-            if (typeof thisPlugin.seek === "function") {
+            if (thisPlugin && typeof thisPlugin.seek === "function") {
                 thisPlugin.seek(curPos + 10000);
             } else {
                 this.commandRouter.pushConsoleMessage('WARNING: No seek method for volatile plugin ' + this.volatileService);
@@ -1151,7 +1171,7 @@ CoreStateMachine.prototype.seek = function (position) {
 			var curPos = this.getState().seek;
 			var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
 			this.currentSeek = curPos - 10000;
-            if (typeof thisPlugin.seek === "function") {
+            if (thisPlugin && typeof thisPlugin.seek === "function") {
                 thisPlugin.seek(curPos - 10000);
             } else {
                 this.commandRouter.pushConsoleMessage('WARNING: No seek method for volatile plugin ' + this.volatileService);
@@ -1160,7 +1180,7 @@ CoreStateMachine.prototype.seek = function (position) {
 			this.pushState().fail(this.pushError.bind(this));
 		}else{
 			var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
-            if (typeof thisPlugin.seek === "function") {
+            if (thisPlugin && typeof thisPlugin.seek === "function") {
                 thisPlugin.seek(position * 1000);
             } else {
                 this.commandRouter.pushConsoleMessage('WARNING: No seek method for volatile plugin ' + this.volatileService);
@@ -1180,7 +1200,7 @@ CoreStateMachine.prototype.seek = function (position) {
 
         this.currentSeek = curPos + 10000;
         this.startPlaybackTimer(curPos + 10000);
-        if (typeof thisPlugin.seek === "function") {
+        if (thisPlugin && typeof thisPlugin.seek === "function") {
             thisPlugin.seek(curPos + 10000);
         } else {
         	this.commandRouter.pushConsoleMessage('WARNING: No seek method for plugin ' + trackBlock.service);
@@ -1195,7 +1215,7 @@ CoreStateMachine.prototype.seek = function (position) {
 
       	this.currentSeek = curPos - 10000;
   	    this.startPlaybackTimer(curPos - 10000);
-  	    if (typeof thisPlugin.seek === "function") {
+  	    if (thisPlugin && typeof thisPlugin.seek === "function") {
 			thisPlugin.seek(curPos - 10000);
 		} else {
 			this.commandRouter.pushConsoleMessage('WARNING: No seek method for plugin ' + trackBlock.service);
@@ -1210,7 +1230,7 @@ CoreStateMachine.prototype.seek = function (position) {
 
         this.currentSeek = position*1000;
         this.startPlaybackTimer(position*1000);
-        if (typeof thisPlugin.seek === "function") {
+        if (thisPlugin && typeof thisPlugin.seek === "function") {
 			thisPlugin.seek(position*1000);
 		} else {
 			this.commandRouter.pushConsoleMessage('WARNING: No seek method for plugin ' + trackBlock.service);
@@ -1227,10 +1247,13 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 	this.commandRouter.pushConsoleMessage('CoreStateMachine::next');
 
 	if(this.isVolatile){
-		var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
-		volatilePlugin.next();
-	}else{
-
+        var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
+        if (typeof volatilePlugin.next === "function") {
+            volatilePlugin.next();
+        } else {
+            this.commandRouter.pushConsoleMessage('WARNING: No next method for plugin ' + this.volatileService);
+        }
+	} else{
 		//self.setConsumeUpdateService(undefined);
 		if (this.isConsume && this.consumeState.service != undefined) {
 			var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.consumeState.service);
@@ -1348,12 +1371,13 @@ CoreStateMachine.prototype.serviceStop = function () {
 		var trackBlock = this.getTrack(this.currentPosition);
 		if (trackBlock && trackBlock.service){
 			return this.commandRouter.serviceStop(trackBlock.service);
-		} else if (this.isUpnp) {
-			var mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
-			return mpdPlugin.stop();
-		} else {
-            return libQ.resolve();
-		}
+            //} else if (this.isUpnp) {
+            // var mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
+            // return mpdPlugin.stop();
+        } else {
+            var mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
+            return mpdPlugin.stop();
+        }
 	}
 };
 
@@ -1364,7 +1388,11 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 
 	if(this.isVolatile){
 		var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
-		volatilePlugin.previous();
+        if (typeof volatilePlugin.previous === "function") {
+            volatilePlugin.previous();
+        } else {
+            this.commandRouter.pushConsoleMessage('WARNING: No previous method for plugin ' + this.volatileService);
+        }
 	}else{
 		//self.setConsumeUpdateService(undefined);
 		this.commandRouter.pushConsoleMessage('CoreStateMachine::previous');

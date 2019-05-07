@@ -70,7 +70,18 @@ function CoreVolumeController(commandRouter) {
 		});
 
 		p.stderr.on('data', function (data) {
-			err = new Error('Alsa Mixer Error: ' + data);
+            try {
+                // Avoid to pass pulse introduced error in parsing
+                //console.log('---' + data.toString().replace(/\n/g, '') + '---');
+                if (data.toString().replace(/\n/g, '') === 'No protocol specified' || data.toString().replace(/\n/g, '') === 'xcb_connection_has_error() returned true') {
+                    // ignoring those errors
+                    //console.log('IGNORING')
+                } else {
+                    err = new Error('Alsa Mixer Error: ' + data);
+                }
+            } catch(e) {
+                err = new Error('Alsa Mixer Error: ' + data);
+            }
 		});
 
 		p.on('close', function () {
@@ -113,7 +124,7 @@ function CoreVolumeController(commandRouter) {
             } else {
                 var volumeParamsArray = ['get', '-c', device, mixer];
             }
-            amixer(['get', '-c', device, mixer], function (err, data) {
+            amixer(volumeParamsArray, function (err, data) {
                 if (err) {
                     cb(err);
                 } else {
@@ -190,7 +201,6 @@ function CoreVolumeController(commandRouter) {
                 self.logger.info('Cannot set Volume with script: '+e);
 			}
 		} else {
-            //console.log('amixer -M set -c '+device + ' '+ mixer + ' '+val+'%')
             if (volumecurve === 'logarithmic') {
                 amixer(['-M', 'set', '-c', device, mixer, 'unmute', val + '%'], function (err) {
                     cb(err);
@@ -235,8 +245,21 @@ function CoreVolumeController(commandRouter) {
 CoreVolumeController.prototype.updateVolumeSettings = function (data) {
 	var self = this;
 
-
 	self.logger.info('Updating Volume Controller Parameters: Device: '+ data.device + ' Name: '+ data.name +' Mixer: '+ data.mixer + ' Max Vol: ' + data.maxvolume + ' Vol Curve; ' + data.volumecurve + ' Vol Steps: ' + data.volumesteps);
+
+    if (data.mixertype !== undefined  && mixertype !== 'None' && mixer !== undefined && mixer.length && (data.mixertype === 'None' || data.mixertype === 'Software')) {
+        self.setVolume(100, function (err) {
+            if (err) {
+                self.logger.error('Cannot set ALSA Volume: ' + err);
+            }
+        });
+    }
+
+    if (mixertype && mixertype === 'None' && data.mixertype !== undefined && (data.mixertype === 'Software' || data.mixertype === 'Hardware')) {
+        setTimeout(()=>{
+            self.setStartupVolume();
+        }, 5000)
+    }
 
 	device = data.device;
     if (device.indexOf(',') >= 0) {
@@ -254,6 +277,8 @@ CoreVolumeController.prototype.updateVolumeSettings = function (data) {
 	volumesteps = data.volumesteps;
 	mixertype = data.mixertype
 	devicename = data.name;
+
+
 
 	return self.retrievevolume();
 }
@@ -470,4 +495,14 @@ CoreVolumeController.prototype.retrievevolume = function () {
             });
         }
     return defer.promise
+};
+
+CoreVolumeController.prototype.setStartupVolume = function () {
+    var self = this;
+
+    var startupVolume = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumestart');
+    if (startupVolume != 'disabled') {
+        self.logger.info('VolumeController:: Setting startup Volume ' + startupVolume);
+        return self.commandRouter.volumiosetvolume(parseInt(startupVolume));
+    }
 };

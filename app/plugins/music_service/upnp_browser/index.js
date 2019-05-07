@@ -70,25 +70,46 @@ ControllerUPNPBrowser.prototype.onStart = function() {
                     if (err) {
                         return self.logger.error(err);
                     }
+
+                    var device = (data.root.device || [])[0];
+                    if (!device) {
+                        return;
+                    }
+
                     var server = {};
-                    server.name = data.root.device[0].friendlyName[0];
-                    server.UDN = data.root.device[0].UDN + "";
+                    server.name = (device.friendlyName || [])[0];
+                    server.UDN = (device.UDN || [])[0] + "";
                     try {
-                        server.icon = "http://" + urlraw[0] + ":" + urlraw[1] + data.root.device[0].iconList[0].icon[0].url;
+                        var iconList = (device.iconList || [])[0] || {};
+                        var icon = (iconList.icon || [])[0] || {};
+                        var iconUrl = (icon.url || [])[0] || '';
+                        if (iconUrl.startsWith('//')) {
+                            iconUrl = 'http:' + iconUrl;
+                        }
+                        if (iconUrl.includes('://')) {
+                            server.icon = iconUrl
+                        } else {
+                            if (!iconUrl.startsWith('/')) {
+                                iconUrl = '/' + iconUrl;
+                            }
+                            server.icon = "http://" + urlraw[0] + ":" + urlraw[1] + iconUrl;
+                        }
 					} catch(e) {
                         server.icon = '/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png';
 					}
                     server.lastTimeAlive = Date.now();
                     server.location = location.url + ":" + location.port;
-                    var services = data.root.device[0].serviceList[0].service;
-                    var ContentDirectoryService = false;
-                    //Finding ContentDirectory Service
-                    for(var s = 0; s < services.length; s++){
-                        if(services[s].serviceType[0] == "urn:schemas-upnp-org:service:ContentDirectory:1"){
-                            ContentDirectoryService = services[s];
-                            server.location += ContentDirectoryService.controlURL[0];
-                        }
+
+                    var serviceList = (device.serviceList || [])[0] || {};
+                    var services = serviceList.service || [];
+                    var ContentDirectoryService = services.find(function (service) {
+                        var serviceType = (service.serviceType || [])[0];
+                        return (serviceType === "urn:schemas-upnp-org:service:ContentDirectory:1");
+                    });
+                    if (!ContentDirectoryService) {
+                        return;
                     }
+                    server.location += ((ContentDirectoryService.controlURL || [])[0] || '');
 
                     var duplicate = false;
                     for(var i = 0; i < self.DLNAServers.length; i++){
@@ -466,10 +487,12 @@ ControllerUPNPBrowser.prototype.explodeUri = function(uri) {
 	var self = this;
 
 	var defer=libQ.defer();
+	var entranceUri = uri;
 	uri = uri.replace("upnp/", "");//Removing upnp/
 	var folder = uri.startsWith("folder/");
-	if(folder)
-		uri = uri.replace("folder/");
+	if (folder) {
+        uri = uri.replace("folder/");
+	}
 	var address = uri.split("@")[0];//Getting server address
 	var id = uri.split("@")[1];//Getting item ID
 	var browseFlag = folder ? "BrowseDirectChildren" : "BrowseMetadata";
@@ -493,6 +516,7 @@ ControllerUPNPBrowser.prototype.explodeUri = function(uri) {
 						var obj = {
 							"service": "upnp_browser",
 							"uri": item.source,
+							"realUri": entranceUri,
 							"type": "song",
 							"albumart": albumart,
 							"artist": item.artist,
@@ -647,4 +671,4 @@ ControllerUPNPBrowser.prototype.prefetch = function (trackBlock) {
     	.then(function(){
         	return self.mpdPlugin.sendMpdCommand('consume 1',[]);
     	});
-}
+};
