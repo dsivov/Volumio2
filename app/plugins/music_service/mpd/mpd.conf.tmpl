@@ -70,6 +70,8 @@ audio_output {
     format          "44100:16:2"
 }
 
+
+
 #replaygain			"album"
 #replaygain_preamp		"0"
 volume_normalization		"${volume_normalization}"
@@ -93,3 +95,11 @@ max_output_buffer_size		"81920"
 filesystem_charset		"UTF-8"
 id3v1_encoding			"UTF-8"
 ###############################################################################
+audio_output {
+    type                    "fifo"
+    name                    "spec_fifo"
+    path                    "/tmp/mpd_oled_fifo"
+    format                  "44100:16:2"
+    #buffer_time             "500000"
+}
+
