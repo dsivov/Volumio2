@@ -73,7 +73,14 @@
     "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"This setting controls the ability to read a wide variety of Audio formats, however it might slow down the creation of music library database. If disabled, the system will still read most of music formats and Music Library scanning will be much faster.",
     "USB_DAC_CONNECTED":"USB DAC Connected",
     "NO_OUTPUT_DEVICE":"No Audio Output Available",
-    "NO_OUTPUT_DEVICE_MESSAGE":"Please connect an Audio Output Device to the Unit"
+    "NO_OUTPUT_DEVICE_MESSAGE":"Please connect an Audio Output Device to the Unit",
+    "OUTPUT_DEVICE_NOT_AVAILABLE":"The selected output device is not available",
+    "CONNECT_OUTPUT_DEVICE_1":"Please connect",
+    "CONNECT_OUTPUT_DEVICE_2":"to the unit or select a different output device from playback options",
+    "PLAYBACK_MODE":"Playback Mode",
+    "PLAYBACK_MODE_DOC":"You can select the plabyack Behaviour: Continuous will replace your current queue with all the songs in an album or a playlist, single will only add to queue the song you selected to play",
+    "PLAYBACK_MODE_CONTINUOUS":"Continuous",
+    "PLAYBACK_MODE_SINGLE":"Single"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",
@@ -180,7 +187,7 @@
 	"MATCHING":"matching",	
     "CANCEL":"Cancel",
     "NONE":"None",
-    "LAST_100":"last 100",
+    "LAST_100":"Last 100",
 	"CONTINUE":"Continue",
 	"SETTINGS_SAVED_SUCCESSFULLY":"Settings saved successfully",
 	"SETTINGS_SAVE_ERROR":"Error in saving settings",
@@ -193,7 +200,20 @@
     "NO_RESULTS":"No results",
     "REMOVE_FAIL":"Could not remove",
     "CONNECTED":"Connected",
-    "DISCONNECTED":"Disconnected"
+    "DISCONNECTED":"Disconnected",
+    "LOGIN":"Login",
+    "LOGOUT":"Logout",
+    "USERNAME":"Username",
+    "PASSWORD":"Password",
+    "LOGGING_IN":"Logging in",
+    "LOGIN_SUCCESS": "Successfully logged in",
+    "LOGIN_FAIL":"failed to log in",
+    "LOGGING_OUT":"Logging out",
+    "LOGOUT_SUCCESS":"Successfully logged out",
+    "OR":"or",
+    "SOURCES":"Sources",
+    "CLOSE":"Close",
+    "CANNOT_LIST":"Cannot list"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
@@ -228,7 +248,15 @@
     "ALBUMART_RESET_CACHE_DOC":"The system caches your albumart to improve performance, but this prevents newly added albumart from being shown. By resetting the cache you will be able to see newly added albumart.",
     "METADATA_IMAGE":"Show embedded albumart",
     "METADATA_IMAGE_DOC":"When enabled, if no albumart file can be found in the folder, the system will attempt to extract any albumart embedded in your music files. This will most likely increase albumart loading times",
-    "BROWSE_SOURCES_VISIBILITY":"Sources Visibility"
+    "BROWSE_SOURCES_VISIBILITY":"Sources Visibility",
+    "VOLUMIO3_EXPERIMENTAL_UI":"Enable Experimental User Interface",
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Enable Experimental User Interface",
+    "UPLOAD_FAILED":"Upload failed",
+    "IMAGE_MUST_BE_LESS_THAN":"Image size must be less than",
+    "USER_INTERFACE_LAYOUT_DESIGN":"User Interface layout design",
+    "USER_INTERFACE_LAYOUT_DESIGN_DOC":"Select the desired user interface layout design. Contemporary UI offers an experience based on the most popular music players UI. Classic has a 3 tab design, offering a more minimalistic approach ",
+    "USER_INTERFACE_CONTEMPORARY":"Contemporary",
+    "USER_INTERFACE_CLASSIC":"Classic"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"My Music",
@@ -241,7 +269,8 @@
     "SLEEP":"Sleep",
     "CREDITS":"Credits",
     "SHUTDOWN":"Shutdown",
-    "HELP":"Help"
+    "HELP":"Help",
+    "SOURCES":"Sources"
   },
   "ALARM":{
     "ALARM_CLOCK_TITLE":"Alarm Clock",
@@ -308,7 +337,16 @@
     "SUCCESSFULLY_DELETED_FOLDER":"Successfully deleted folder",
     "ERROR_DELETING_FOLDER":"Error in deleting folder",
     "SHOW_ADVANCED_SETTINGS":"Show Advanced Settings",
-    "SHOW_ADVANCED_SETTINGS_DOC":"When enabled, the system will show some advanced settings to allow advanced tweakings. Those settings should be operated by experts only"
+    "SHOW_ADVANCED_SETTINGS_DOC":"When enabled, the system will show some advanced settings to allow advanced tweakings. Those settings should be operated by experts only",
+    "FULL_SETTINGS_SET":"Full Settings Mode",
+    "FULL_SETTINGS_SET_EXTENDED":"I want the full set of options",
+    "SIMPLE_SETTINGS_SET":"Simplified Settings Mode",
+    "SIMPLE_SETTINGS_SET_EXTENDED":"I want a simplified set of options",
+    "KEEP_PRESSED_TO_TURN_OFF_IN":"Keep pressed to turn off in",
+    "TURN_OFF_IN":"Turn off in",
+    "PRIVACY_SETTINGS":"Privacy Settings",
+    "ALLOW_UI_STATISTICS":"Allow UI Statistics collection",
+    "ALLOW_UI_STATISTICS_DOC":"Allow the collection of behavioural and usage statistics on Volumio UI via Facebbook Pixel and Google Analytitcs. Those datas are used to improve Volumio user experience. For further informations about how we collect and process data please refer to volumio.org/privacy-policy"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",
@@ -316,7 +354,13 @@
     "TOP_500_RADIOS":"Top 500 Radios",
     "BY_GENRE_RADIOS":"By genre",
     "BY_COUNTRY_RADIOS":"By country",
-    "WEBRADIO":"Web Radio"
+    "WEBRADIO":"Web Radio",
+    "LOCAL_RADIOS":"Local Radios",
+    "POPULAR_RADIOS":"Popular Radios",
+    "BEST_RADIOS":"Best Radios",
+    "BY_LANGUAGE":"By Language",
+    "TALK_RADIOS":"Talk Radios",
+    "SHOUTCAST_ERROR":"An error occurred while querying SHOUTCAST"
   },
   "PLUGINS":{
     "CONFIRM_PLUGIN_UNINSTALL":"Confirm plugin uninstall",
@@ -329,7 +373,34 @@
     "PLUGIN_START_ERROR":"This plugin is failing to start. Please install updated version, or contact plugin developer",
     "CONFIRM_PLUGIN_INSTALL":"Install Plugin",
     "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Warning, community plugins are developed by third party developers and might result in unexpected behaviours and system instabilitiy. Are you sure you want to install this plugin",
-    "INSTALL":"Install"
+    "INSTALL":"Install",
+    "SUCCESSFULLY_INSTALLED":"Successfully Installed",
+    "ENABLE_PLUGIN_NOW_QUESTION":"Do you want to enable the plugin now?",
+    "ENABLE_PLUGIN":"Enable Plugin",
+    "DOWNLOADING_PLUGIN":"Downloading plugin",
+    "INSTALLING_PLUGIN":"Installing plugin",
+    "CREATING_INSTALL_LOCATION":"Creating install location",
+    "UNPACKING_PLUGIN":"Unpacking plugin",
+    "CHECKING_DUPLICATE_PLUGIN":"Checking for duplicate plugin",
+    "COPYING_PLUGIN_TO_LOCATION":"Copying plugin to location",
+    "INSTALLING_NECESSARY_UTILITIES":"Installing necessary utilities",
+    "FINALIZING_INSTALLATION":"Finalizing installation",
+    "PLUGIN_INSTALL_COMPLETED":"Plugin update completed",
+    "PLUGIN_INSTALL_ERROR_OCCURRED":"An error occurred while installing the plugin",
+    "UPDATING_PLUGIN":"Updating plugin",
+    "PLUGIN_STOPPED":"Plugin stopped",
+    "UPDATING_PLUGIN_FILES":"Updating plugin files",
+    "SUCCESSFULLY_UPDATED_PLUGIN":"Successfully updated plugin",
+    "PLUGIN_UPDATE_COMPLETED":"Plugin update completed",
+    "PLUGIN_UPDATE_FAILED":"Plugin update failed",
+    "PLUGIN_UPDATE_ERROR_OCCURRED":"An error occurred while updating the plugin",
+    "UNINSTALLING_PLUGIN":"Uninstalling plugin",
+    "PLUGIN_DISABLED":"Plugin disabled",
+    "REMOVING_NECESSARY_UTILITIES":"Removing necessary utilities",
+    "FINALIZING_UNINSTALL":"Finalizing plugin uninstall",
+    "PLUGIN_UNINSTALLED":"Plugin successfully uninstalled",
+    "PLUGIN_UNINSTALL_ERROR_OCCURRED":"An error occurred while uninstalling the plugin",
+    "PLUGIN_UNINSTALL_FAILED":"Plugin uninstall failed"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Congratulations",
@@ -352,5 +423,14 @@
     "UPDATE":"Update",
     "CHECKING_FOR_UPDATES":"Checking for Updates",
     "CHECKING_FOR_UPDATES_WAIT":"Please Wait"
+  },
+  "MYVOLUMIO":{
+    "FEATURE_NOT_AVAILABLE":"Feature not available with current plan",
+    "FEATURE_NOT_AVAILABLE_CURRENT_PLAN":"This feature cannot be enabled, since it's not available in your current MyVolumio Plan",
+    "PLAN_REQUIRED":"is required to use this functionality",
+    "UPGRADE_YOUR_PLAN_NOW":"Upgrade your plan now",
+    "MYVOLUMIO_NOT_ENABLED_ON_DEVICE":"MyVolumio is not enabled on this device",
+    "ENABLE_YOUR_DEVICE_TO_USE_THIS_FUNCTIONALITY":"To use this functionality, please enable MyVolumio on this device from your device list",
+    "GOTO_DEVICE_LIST":"Go to My Devices list"
   }
 }

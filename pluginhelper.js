@@ -1,3 +1,4 @@
+/* eslint-disable */
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
@@ -246,11 +247,11 @@ function customize_package(pluginName, path, category) {
             {
                 type: 'input',
                 name: 'description',
-                message: 'Insert a brief description of your plugin (100 chars)',
+                message: 'Insert a brief description of your plugin (Maximum 200 characters)',
                 default: pluginName.sysName,
                 validate: function (desc) {
-                    if(desc.length > 100){
-                        return "please be brief";
+                    if(desc.length > 200){
+                        return "Description is too long. Use 200 characters maximum";
                     }
                     return true;
                 }
@@ -551,7 +552,7 @@ function write_new_plugin(package, arch, plugins, index) {
             default: "",
             validate: function (desc) {
                 if(desc.length > 1000){
-                    return "please be brief";
+                    return "Description is too long. Use 1000 characters maximum";
                 }
                 return true;
             }
@@ -625,7 +626,7 @@ function update_desc_details(package, plugins, catIndex, plugIndex, arch) {
             default: plugins.categories[catIndex].plugins[plugIndex].details,
             validate: function (desc) {
                 if(desc.length > 1000){
-                    return "please be brief";
+                    return "Description is too long. Use 1000 characters maximum";
                 }
                 return true;
             }
@@ -637,8 +638,8 @@ function update_desc_details(package, plugins, catIndex, plugIndex, arch) {
             ' (leave blank for default)',
             default: package.description,
             validate: function (desc) {
-                if(desc.length > 100){
-                    return "please be brief";
+                if(desc.length > 200){
+                    return "Description is too long. Use 200 characters maximum";
                 }
                 return true;
             }
